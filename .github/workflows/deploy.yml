@@ -1,0 +1,71 @@
+name: Build & Publish Dynatrace Azure Log Forwarder
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., release-0.2.11)'
+        required: true
+        default: 'release-0.2.11'
+      make_latest:
+        description: 'Mark this release as Latest'
+        required: true
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'release-*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # necesario para crear el release y subir assets
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build function ZIP
+        run: |
+          chmod +x buildZip.sh
+          ./buildZip.sh
+          # Renombrar a como lo espera el script oficial
+          mv publish.zip dynatrace-azure-log-forwarder.zip
+
+          # Copiar el JSON y el script a la raíz con los nombres esperados
+          cp deployment/dynatrace-azure-forwarder.json dynatrace-azure-forwarder.json
+          cp deployment/dynatrace-azure-logs.sh dynatrace-azure-logs.sh
+
+          # Mostrar contenidos
+          echo "== Assets a publicar =="
+          ls -l dynatrace-azure-*.*
+          echo "== Contenido del ZIP =="
+          unzip -l dynatrace-azure-log-forwarder.zip
+
+      - name: Calcular SHA256 (opcional, para notas)
+        id: sums
+        run: |
+          echo "ZIP_SHA=$(sha256sum dynatrace-azure-log-forwarder.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "JSON_SHA=$(sha256sum dynatrace-azure-forwarder.json | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "SH_SHA=$(sha256sum dynatrace-azure-logs.sh | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          draft: false
+          prerelease: false
+          make_latest: ${{ github.event.inputs.make_latest }}
+          files: |
+            dynatrace-azure-forwarder.json
+            dynatrace-azure-log-forwarder.zip
+            dynatrace-azure-logs.sh
+          body: |
+            What's Changed
+            - Custom forwarder template + packaged Function.
+
+            SHA256
+            - dynatrace-azure-forwarder.json: ${{ steps.sums.outputs.JSON_SHA }}
+            - dynatrace-azure-log-forwarder.zip: ${{ steps.sums.outputs.ZIP_SHA }}
+            - dynatrace-azure-logs.sh: ${{ steps.sums.outputs.SH_SHA }}
