@@ -16,7 +16,7 @@
 readonly FUNCTION_ARM=dynatrace-azure-forwarder.json
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-azure-log-forwarder.zip
 # Please be cautious with editing the following line, as CI is changing latest to specific version on release, see: .travis.yml
-readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/aldo2510/dynatrace-azure-log-forwarder/releases/latest/download/
+readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/rolands7/dynatrace-azure-log-forwarder/releases/latest/download/
 readonly DYNATRACE_TARGET_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 readonly DEPLOYMENT_NAME_REGEX="^[a-z0-9]{3,20}$"
@@ -539,3 +539,4 @@ fi
 success "Deployment complete. Check logs in Dynatrace in 10 min. ${LOG_VIEWER}"
 info "If you won't see any Azure logs after that time make sure you configured all prerequisites: https://www.dynatrace.com/support/help/shortlink/azure-log-fwd#anchor_prereq"
 info "Additionally you can enable self-monitoring for diagnostic purpose: https://www.dynatrace.com/support/help/shortlink/azure-log-fwd#self-monitoring-optional"
+
